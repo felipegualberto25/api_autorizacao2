@@ -1,0 +1,5 @@
+Nesta versão é utilizado ocr e o modelo all-mpnet-base-v2.
+após extrair o texto, é identificado os códigos de procedimentos existentes no arquivo
+procedimento.csv.
+Quando não localizado, é acionado o modelo para buscar pela similaridade do texto.
+Também existem algumas regras fixas para evitar textos indesejados e permitir desejados.

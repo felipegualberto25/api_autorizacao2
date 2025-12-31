@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  ocr_redis:
+    image: redis:7
+    container_name: ocr_redis
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    container_name: ocr_api
+    working_dir: /app
+    command: uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - MATCHER_THRESHOLD=93
+      - CELERY_BROKER_URL=redis://ocr_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://ocr_redis:6379/1
+      - UPLOAD_DIR=/app/data/uploads
+      - DATA_DIR=/app/data
+      - PROCEDURES_CSV=/app/data/procedimentos.csv     # <-- ADICIONADO
+      - EMBEDDING_THRESHOLD=0.92
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      # Se preferir montar o arquivo explicitamente como read-only:
+      # - ./data/procedimentos.csv:/app/data/procedimentos.csv:ro
+    depends_on:
+      - ocr_redis
+    ports:
+      - "8000:8000"
+
+  worker:
+    build: .
+    container_name: ocr_worker
+    working_dir: /app
+    command: celery -A app.tasks.celery_app worker --loglevel=info -Q celery --pool=solo -c 1
+    # se quiser paralelismo depois, dá pra trocar para prefork (-c 2, 4...) mantendo lazy-import
+    environment:
+      - MATCHER_THRESHOLD=93
+      - CELERY_BROKER_URL=redis://ocr_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://ocr_redis:6379/1
+      - DATA_DIR=/app/data
+      - PROCEDURES_CSV=/app/data/procedimentos.csv     # <-- ADICIONADO
+      - EMBEDDING_THRESHOLD=0.92
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      # - ./data/procedimentos.csv:/app/data/procedimentos.csv:ro
+    depends_on:
+      - ocr_redis

@@ -1,0 +1,1 @@
+docker exec -it ocr_worker python scripts/build_procedure_index.py
