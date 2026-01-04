@@ -127,10 +127,3 @@ Retorno inclui:
 - códigos encontrados
 - caminho do log
 
----
-
-## 📝 Próximos Passos Possíveis
-- alias médicos configuráveis
-- modelos de reranking
-- endpoint de consulta de log
-- mais heurísticas para laudos diferentes
